@@ -1,0 +1,78 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.fileInput {
+  display: none;
+}
+
+.fileInputLabel {
+  display: inline-block;
+  padding: 10px 15px;
+  background-color: #4caf50;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.processButton {
+  padding: 10px 15px;
+  background-color: #008cba;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.processButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.error {
+  color: red;
+  margin-top: 10px;
+}
+
+.pdfViewer {
+  height: 500px;
+  margin-top: 20px;
+  border: 1px solid #ddd;
+}
+
+.outputSection {
+  margin-top: 20px;
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 4px;
+}
+
+.outputSection h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.outputContent {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  background-color: white;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.jsonOutput {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 14px;
+}
