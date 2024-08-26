@@ -216,14 +216,19 @@ const PdfProcessor = () => {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.header}>Module Creator</h1>
+      <span style={{
+        width: '100%',
+        textAlign: 'center',
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: '20px',
+      }}>Module Creator</span>
       <div
         style={{
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "center",
-          marginBottom: 20,
           gap: 10,
         }}
       >
@@ -246,56 +251,115 @@ const PdfProcessor = () => {
         </button>
       </div>
       {pdfError && <p className={styles.error}>{pdfError}</p>}
-      {fileUrl && (
-        <div className={styles.pdfViewer}>
-          <Worker
-            workerUrl={`//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`}
-          >
-            <Viewer
-              fileUrl={fileUrl}
-              plugins={[defaultLayoutPluginInstance]}
-              onError={(error) => {
-                console.error("Error rendering PDF:", error);
-                setPdfError("Failed to render PDF. Please try another file.");
-              }}
-            />
-          </Worker>
-        </div>
-      )}
-      {(extractingText || extractedText) && (
-        <div className={styles.outputSection}>
-          <h3>Extracted Text</h3>
-          {extractingText ? (
-            <p className={styles.loader}>Extracting text...</p>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'stretch',
+          justifyContent: 'space-between',
+          gap: 20,
+          height: 'calc(100vh - 200px)',
+          flex: 1
+        }}
+      >
+        <div
+          className={styles.pdfViewer}
+          style={{
+            width: '50%',
+            height: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            border: '1px solid #ccc',
+            borderRadius: '4px',
+          }}
+        >
+          {fileUrl ? (
+            <Worker
+              workerUrl={`//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`}
+            >
+              <Viewer
+                fileUrl={fileUrl}
+                plugins={[defaultLayoutPluginInstance]}
+                onError={(error) => {
+                  console.error("Error rendering PDF:", error);
+                  setPdfError("Failed to render PDF. Please try another file.");
+                }}
+              />
+            </Worker>
           ) : (
-            <div className={styles.outputContent}>{extractedText}</div>
+            <p className={styles.placeholderText}>Upload a PDF to view it here</p>
           )}
         </div>
-      )}
-      {(creatingModules || modules) && (
-        <div className={styles.outputSection}>
-          <h3>Modules</h3>
-          {creatingModules ? (
-            <p className={styles.loader}>Creating modules...</p>
+        <div
+          style={{
+            width: '50%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            border: '1px solid #ccc',
+            borderRadius: '4px',
+            overflow: 'auto',
+          }}
+        >
+          {!extractedText && !loading ? (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+            }}>
+              Process PDF to see extracted data, modules, and assessment
+            </div>
           ) : (
-            <pre className={`${styles.outputContent} ${styles.jsonOutput}`}>
-              {JSON.stringify(modules, null, 2)}
-            </pre>
+            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {(extractingText || extractedText) && (
+                <div className={styles.outputSection}>
+                  <h3>Extracted Text</h3>
+                  {extractingText ? (
+                    <p className={styles.loader}>
+                      Extracting text
+                      <span>.</span><span>.</span><span>.</span>
+                    </p>
+                  ) : (
+                    <div className={styles.outputContent}>{extractedText}</div>
+                  )}
+                </div>
+              )}
+              {(creatingModules || modules) && (
+                <div className={styles.outputSection}>
+                  <h3>Modules</h3>
+                  {creatingModules ? (
+                    <p className={styles.loader}>
+                      Creating modules
+                      <span>.</span><span>.</span><span>.</span>
+                    </p>
+                  ) : (
+                    <pre className={`${styles.outputContent} ${styles.jsonOutput}`}>
+                      {JSON.stringify(modules, null, 2)}
+                    </pre>
+                  )}
+                </div>
+              )}
+              {(creatingAssessment || assessment) && (
+                <div className={styles.outputSection}>
+                  <h3>Assessment</h3>
+                  {creatingAssessment ? (
+                    <p className={styles.loader}>
+                      Creating assessment
+                      <span>.</span><span>.</span><span>.</span>
+                    </p>
+                  ) : (
+                    <pre className={`${styles.outputContent} ${styles.jsonOutput}`}>
+                      {JSON.stringify(assessment, null, 2)}
+                    </pre>
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </div>
-      )}
-      {(creatingAssessment || assessment) && (
-        <div className={styles.outputSection}>
-          <h3>Assessment</h3>
-          {creatingAssessment ? (
-            <p className={styles.loader}>Creating assessment...</p>
-          ) : (
-            <pre className={`${styles.outputContent} ${styles.jsonOutput}`}>
-              {JSON.stringify(assessment, null, 2)}
-            </pre>
-          )}
-        </div>
-      )}
+      </div>
     </div>
   );
 };
