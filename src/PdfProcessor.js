@@ -17,7 +17,9 @@ const PdfProcessor = () => {
   const [assessment, setAssessment] = useState(null);
   const [loading, setLoading] = useState(false);
   const [pdfError, setPdfError] = useState(null);
-  console.log("ASsement", assessment);
+  const [extractingText, setExtractingText] = useState(false);
+  const [creatingModules, setCreatingModules] = useState(false);
+  const [creatingAssessment, setCreatingAssessment] = useState(false);
 
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
@@ -65,15 +67,22 @@ const PdfProcessor = () => {
 
     setLoading(true);
     setPdfError(null);
+    setExtractedText("");
+    setModules(null);
+    setAssessment(null);
 
     try {
+      // Extract text
+      setExtractingText(true);
       const text = await extractTextFromPdf(file);
       setExtractedText(text);
+      setExtractingText(false);
 
       const openaiApiKey = process.env.REACT_APP_OPENAI_API_KEY;
       const apiUrl = "https://api.openai.com/v1/chat/completions";
 
-      // Extract text
+      // Create modules
+      setCreatingModules(true);
       const extractPrompt = `Create 2 training modules and also in training module give the image links from documents, where each module should be at max 50 words from this text ${text}`;
       const extractResponse = await axios.post(
         apiUrl,
@@ -91,7 +100,6 @@ const PdfProcessor = () => {
 
       const extractedContent = extractResponse.data.choices[0].message.content;
 
-      // Create modules
       const MODULE_JSON = `{
         "machineName": "Name of the machine on which the content is based",
         "modules": [
@@ -134,8 +142,10 @@ const PdfProcessor = () => {
         moduleResponse.data.choices[0].message.content
       );
       setModules(modulesJson);
+      setCreatingModules(false);
 
       // Create assessment
+      setCreatingAssessment(true);
       const ASSESSMENT_JSON = `{
         "assessment": {
           "moduleName": "module name",
@@ -190,6 +200,7 @@ const PdfProcessor = () => {
         assessmentResponse.data.choices[0].message.content
       );
       setAssessment(assessmentJson);
+      setCreatingAssessment(false);
     } catch (error) {
       console.error("Error processing file:", error);
       setPdfError(
@@ -197,6 +208,9 @@ const PdfProcessor = () => {
       );
     } finally {
       setLoading(false);
+      setExtractingText(false);
+      setCreatingModules(false);
+      setCreatingAssessment(false);
     }
   };
 
@@ -248,26 +262,38 @@ const PdfProcessor = () => {
           </Worker>
         </div>
       )}
-      {extractedText && (
+      {(extractingText || extractedText) && (
         <div className={styles.outputSection}>
           <h3>Extracted Text</h3>
-          <div className={styles.outputContent}>{extractedText}</div>
+          {extractingText ? (
+            <p className={styles.loader}>Extracting text...</p>
+          ) : (
+            <div className={styles.outputContent}>{extractedText}</div>
+          )}
         </div>
       )}
-      {modules && (
+      {(creatingModules || modules) && (
         <div className={styles.outputSection}>
           <h3>Modules</h3>
-          <pre className={`${styles.outputContent} ${styles.jsonOutput}`}>
-            {JSON.stringify(modules, null, 2)}
-          </pre>
+          {creatingModules ? (
+            <p className={styles.loader}>Creating modules...</p>
+          ) : (
+            <pre className={`${styles.outputContent} ${styles.jsonOutput}`}>
+              {JSON.stringify(modules, null, 2)}
+            </pre>
+          )}
         </div>
       )}
-      {assessment && (
+      {(creatingAssessment || assessment) && (
         <div className={styles.outputSection}>
           <h3>Assessment</h3>
-          <pre className={`${styles.outputContent} ${styles.jsonOutput}`}>
-            {JSON.stringify(assessment, null, 2)}
-          </pre>
+          {creatingAssessment ? (
+            <p className={styles.loader}>Creating assessment...</p>
+          ) : (
+            <pre className={`${styles.outputContent} ${styles.jsonOutput}`}>
+              {JSON.stringify(assessment, null, 2)}
+            </pre>
+          )}
         </div>
       )}
     </div>
